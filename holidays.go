@@ -1,7 +1,6 @@
 package holidays
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -10,6 +9,7 @@ func IsBrazilianHoliday(date time.Time) bool {
 	holidays := [][]int{
 		{1, 1},   // New Year's Day
 		{4, 21},  // Tiradentes Day
+		{5, 1},   // Worker Day
 		{9, 7},   // Independence Day
 		{10, 12}, // Our Lady of Aparecida
 		{11, 2},  // All Souls' Day
@@ -23,20 +23,31 @@ func IsBrazilianHoliday(date time.Time) bool {
 		}
 	}
 
-	// Check for Carnival
-	carnival := time.Date(date.Year(), 2, 1, 0, 0, 0, 0, time.UTC)
-	if date.Sub(carnival) < 48*time.Hour {
+	//Check for Easter Sunday - this is the base of the other christian holidays
+	easterSunday := calculateEasterSunday(date.Year())
+	if date.Day() == easterSunday.Day() && date.Month() == easterSunday.Month() {
 		return true
 	}
 
-	// Check for Good Friday
-	goodFriday := calculateGoodFriday(date.Year())
+	// Check for Carnaval
+	//there are more factors involved, some brazilians take the whole week, im just checking for monday and tuesday here.
+	carnavalTuesday := easterSunday.AddDate(0, 0, -47)
+	if date.Day() == carnavalTuesday.Day() && date.Month() == carnavalTuesday.Month() {
+		return true
+	}
+	carnavalMonday := carnavalTuesday.AddDate(0, 0, -1)
+	if date.Day() == carnavalMonday.Day() && date.Month() == carnavalMonday.Month() {
+		return true
+	}
+
+	// Check for Good Friday - 2 days before easter sunday
+	goodFriday := easterSunday.AddDate(0, 0, -2)
 	if goodFriday.Day() == date.Day() && goodFriday.Month() == date.Month() {
 		return true
 	}
 
-	//Check for Corpus Christi
-	corpusChristi := calculateCorpusChristi(date.Year())
+	//Check for Corpus Christi - 60 days after easter sunday
+	corpusChristi := easterSunday.AddDate(0, 0, 60)
 	if corpusChristi.Day() == date.Day() && corpusChristi.Month() == date.Month() {
 		return true
 	}
@@ -44,34 +55,23 @@ func IsBrazilianHoliday(date time.Time) bool {
 	return false
 }
 
-func calculateGoodFriday(year int) time.Time {
-	// Calculate Easter Sunday
+func calculateEasterSunday(year int) time.Time {
+	// Calculating easter sunday using the computus algorithm instead of gauss algorithm
 	a := year % 19
-	b := year % 4
-	c := year % 7
-	d := (19*a + 24) % 30
-	e := (2*b + 4*c + 6*d + 5) % 7
-	f := d + e
+	b := year / 100
+	c := year % 100
+	d := b / 4
+	e := b % 4
+	f := (b + 8) / 25
+	g := (b - f + 1) / 3
+	h := (19*a + b - d - g + 15) % 30
+	i := c / 4
+	k := c % 4
+	l := (32 + 2*e + 2*i - h - k) % 7
+	m := (a + 11*h + 22*l) / 451
+	month := (h + l - 7*m + 114) / 31
+	day := (h + l - 7*m + 114) % 31
 
-	// Calculate Good Friday
-	goodFriday := time.Date(year, 3, 22+f, 0, 0, 0, 0, time.UTC)
-	return goodFriday
-}
+	return time.Date(year, time.Month(month), day+1, 0, 0, 0, 0, time.UTC)
 
-func calculateCorpusChristi(year int) time.Time {
-	// Calculate Good Friday
-	goodFriday := calculateGoodFriday(year)
-
-	// Calculate Corpus Christi
-	corpusChristi := goodFriday.AddDate(0, 0, 60)
-	return corpusChristi
-}
-
-func main() {
-	year := 2022
-	goodFriday := calculateGoodFriday(year)
-	corpusChristi := calculateCorpusChristi(year)
-
-	fmt.Printf("Good Friday in %d: %s\n", year, goodFriday.Format("2006-01-02"))
-	fmt.Printf("Corpus Christi in %d: %s\n", year, corpusChristi.Format("2006-01-02"))
 }
