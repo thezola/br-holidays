@@ -25,6 +25,7 @@ func TestIsBrazilianHoliday(t *testing.T) {
 		{time.Date(2023, time.October, 12, 0, 0, 0, 0, time.UTC), true, "Our Lady of Aparecida"},
 		{time.Date(2023, time.November, 2, 0, 0, 0, 0, time.UTC), true, "All Souls' Day"},
 		{time.Date(2023, time.November, 15, 0, 0, 0, 0, time.UTC), true, "Proclamation of the Republic"},
+		{time.Date(2023, time.November, 20, 0, 0, 0, 0, time.UTC), true, "Brazilian Black Consciousness Day"}
 		{time.Date(2023, time.December, 25, 0, 0, 0, 0, time.UTC), true, "Christmas Day"},
 	}
 

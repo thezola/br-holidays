@@ -14,6 +14,7 @@ func IsBrazilianHoliday(date time.Time) bool {
 		{10, 12}, // Our Lady of Aparecida
 		{11, 2},  // All Souls' Day
 		{11, 15}, // Proclamation of the Republic
+		{11, 20}, // Black Consciousness
 		{12, 25}, // Christmas Day
 	}
 
